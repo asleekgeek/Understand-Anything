@@ -42,8 +42,18 @@ describe('skill command hardening', () => {
   it('quotes dashboard cd targets and GRAPH_DIR assignment', () => {
     const content = readRepoFile('understand-anything-plugin/skills/understand-dashboard/SKILL.md');
 
+    expect(content).not.toMatch(/<(?:dashboard-dir|plugin-root|project-dir)>/);
     expect(content).not.toMatch(/\bcd <(?:dashboard-dir|plugin-root)>/);
     expect(content).not.toMatch(/GRAPH_DIR=<project-dir>/);
+    expect(content).toMatch(/PROJECT_DIR=\$\(pwd -P\)/);
+    expect(content).toMatch(/UA_DIR="\$PROJECT_DIR\/\.understand-anything"/);
+    expect(content).toMatch(/\[ ! -f "\$UA_DIR\/knowledge-graph\.json" \]/);
+    expect(content).toMatch(/DASHBOARD_DIR="\$PLUGIN_ROOT\/packages\/dashboard"/);
+    expect(content).toMatch(/: "\$\{PLUGIN_ROOT:\?Run step 3 first so PLUGIN_ROOT is set\}"/);
+    expect(content).toMatch(/: "\$\{PROJECT_DIR:\?Run step 1 first so PROJECT_DIR is set\}"/);
+    expect(content).toMatch(/: "\$\{DASHBOARD_DIR:\?Run step 4 first so DASHBOARD_DIR is set\}"/);
+    expect(content).toMatch(/cd "\$PLUGIN_ROOT" && pnpm --filter @understand-anything\/core build/);
+    expect(content).toMatch(/cd "\$DASHBOARD_DIR" && GRAPH_DIR="\$PROJECT_DIR" npx vite/);
   });
 
   it('marks project-controlled context as untrusted data', () => {
